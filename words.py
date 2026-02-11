@@ -27,6 +27,8 @@ class Word:
     def word_list(self, number: int = None) -> list[str]:  # создаёт список из слов с определённой длиной
         if number is not None:
             self.number = number
+        elif self.number == 0:
+            self.number = random.randint(2, 24)
 
         with open("words.txt", 'r', encoding='utf-8') as f:  # Идём по документу
             # с помощью генератора заполняем список словами с необходимой длиной
@@ -39,4 +41,4 @@ class Word:
 
 
 word = Word()
-print(word.quick_word(3))
+print(word.random_word_list())
