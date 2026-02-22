@@ -1,5 +1,4 @@
-import random
-from random import choice
+from random import choice, randint, sample
 
 
 class Word:
@@ -14,7 +13,7 @@ class Word:
             raise ValueError("Сложность должна быть 1, 2 или 3")
 
         ranges = {1: (2, 5), 2: (6, 12), 3: (13, 24)}
-        self.number = random.randint(*ranges[value])
+        self.number = randint(*ranges[value])
         return self
 
     def __load_words(self, length: int = None) -> list[str]:
@@ -22,7 +21,7 @@ class Word:
         if length is not None:
             self.number = length
         if self.number == 0:
-            self.number = random.randint(2, 24)
+            self.number = randint(2, 24)
 
         if not self.sorted_list:
             with open("words.txt", encoding="utf-8") as f:
@@ -42,7 +41,7 @@ class Word:
         """Возвращает анаграмму слова (если слово не передано — берёт случайное)."""
         if word is None:
             word = self.quick_word()
-        shuffled = "".join(random.sample(word, len(word)))
+        shuffled = "".join(sample(word, len(word)))
         while shuffled == word:
-            shuffled = "".join(random.sample(word, len(word)))
+            shuffled = "".join(sample(word, len(word)))
         return shuffled
