@@ -16,7 +16,7 @@ class Word:
         self.number = randint(*ranges[value])
         return self
 
-    def __load_words(self, length: int = None) -> list[str]:
+    def load_words(self, length: int = None) -> list[str]:
         """Загружает из файла words.txt список слов заданной длины."""
         if length is not None:
             self.number = length
@@ -32,9 +32,10 @@ class Word:
 
     def quick_word(self, level: int = None) -> str:
         """Возвращает случайное слово (можно указать уровень сложности 1–3)."""
+        self.sorted_list=[]
         if level is not None:
             self.__complexity(level)
-        self.__load_words()
+        self.load_words()
         return choice(self.sorted_list) if self.sorted_list else ""
 
     def anagram(self, word: str = None) -> str:
