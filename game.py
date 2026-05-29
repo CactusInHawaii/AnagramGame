@@ -55,11 +55,11 @@ class Game(ctk.CTk):
 
         ctk.CTkLabel(frame, text="Анаграммы", font=("Arial", 28, "bold")).pack(pady=30)
 
-        ctk.CTkButton(frame, text="Играть", width=200, command = lambda :[self.show_complexity(), self.sound_button()]).pack(pady=10)
+        ctk.CTkButton(frame, text="Играть", width=200, command = lambda :[self.sound_button(), self.show_complexity()]).pack(pady=10)
 
-        ctk.CTkButton(frame, text="Настройки", width=200, command = self.settings).pack(pady=10)
+        ctk.CTkButton(frame, text="Настройки", width=200, command = lambda: [self.sound_button(), self.settings()]).pack(pady=10)
 
-        ctk.CTkButton(frame, text="Выход", width=200, command=self.quit).pack(pady=10)
+        ctk.CTkButton(frame, text="Выход", width=200, command=lambda: [self.sound_button(), self.quit()]).pack(pady=10)
 
         self.current_frame = frame
 
@@ -71,7 +71,7 @@ class Game(ctk.CTk):
 
         ctk.CTkLabel(frame, text="Настройки",font=("Arial", 28, "bold"), width=200).pack(pady=10)
 
-        ctk.CTkCheckBox(frame, variable = self.music_value, text="Музыка",width=200,command = self.music).pack(pady=10)
+        ctk.CTkCheckBox(frame, variable = self.music_value, text="Музыка",width=200,command = lambda: [self.sound_button(), self.music()]).pack(pady=10)
 
         ctk.CTkCheckBox(frame, variable = self.sound_button_value, text="Звук от кнопки", width=200,).pack(pady=10)
 
@@ -83,8 +83,9 @@ class Game(ctk.CTk):
         self._music_player.resume() if self.music_value.get() else self._music_player.pause()
 
     def sound_button(self):
-        self.sound_button_value and self._click_player.play() #запуск звука
-        self._click_player.set_volume(self.volume_button) #изменение громкости
+        if self.sound_button_value.get():
+            self._click_player.play() #запуск звука
+            self._click_player.set_volume(self.volume_button) #изменение громкости
 
     def show_complexity(self):
         self.clear_screen()
@@ -94,18 +95,16 @@ class Game(ctk.CTk):
 
         ctk.CTkLabel(frame, text="Выберете сложность", font=("Arial", 24)).pack(pady=10)
 
-        ctk.CTkButton(frame, text="Легко", width=200, command=lambda: self.start_game(1)).pack(pady=10)
+        ctk.CTkButton(frame, text="Легко", width=200, command=lambda: [self.sound_button(), self.start_game(1)]).pack(pady=10)
 
-        ctk.CTkButton(frame, text="Средне", width=200, command=lambda: self.start_game(2)).pack(pady=10)
+        ctk.CTkButton(frame, text="Средне", width=200, command=lambda: [self.sound_button(), self.start_game(2)]).pack(pady=10)
 
-        ctk.CTkButton(frame,text="Сложно",width=200,command=lambda: self.start_game(3)).pack(pady=10)
-
-        self.back_to_menu(frame)
+        ctk.CTkButton(frame,text="Сложно",width=200,command=lambda: [self.sound_button(), self.start_game(3)]).pack(pady=10)
 
         self.current_frame = frame
 
     def back_to_menu(self,frame):
-        return ctk.CTkButton(frame,text="Назад в меню",width=200,command = self.show_menu).pack(pady=10)
+        return ctk.CTkButton(frame,text="Назад в меню",width=200,command = lambda: [self.sound_button(), self.show_menu()]).pack(pady=10)
 
     def show_game(self):
         self.clear_screen()
@@ -126,13 +125,13 @@ class Game(ctk.CTk):
         self.entry = ctk.CTkEntry(frame, textvariable = self.text_variable,width=200)
         self.entry.pack(pady=10)
 
-        self.check_button = ctk.CTkButton(frame, text="Проверить", width=200, command=self.word_checker)
+        self.check_button = ctk.CTkButton(frame, text="Проверить", width=200, command=lambda: [self.sound_button(), self.word_checker()])
         self.check_button.pack(pady=10)
 
-        self.hint_button = ctk.CTkButton(frame, text=f"Подсказка {self.counter}/{self.total_hints}", width=200, command=self.hint)
+        self.hint_button = ctk.CTkButton(frame, text=f"Подсказка {self.counter}/{self.total_hints}", width=200, command=lambda: [self.sound_button(), self.hint()])
         self.hint_button.pack(pady=10)
 
-        ctk.CTkButton(frame, text="Следующее слово", width=200, command=lambda:self.start_game(self.complexity)).pack(pady=10)
+        ctk.CTkButton(frame, text="Следующее слово", width=200, command=lambda:[self.sound_button(), self.start_game(self.complexity)]).pack(pady=10)
 
         self.back_to_menu(frame)
 
