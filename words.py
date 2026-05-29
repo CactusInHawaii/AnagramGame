@@ -38,10 +38,10 @@ class Word:
         self.load_words()
         return choice(self.sorted_list) if self.sorted_list else ""
 
-    def anagram(self, word: str = None) -> str:
-        """Возвращает анаграмму слова (если слово не передано — берёт случайное)."""
-        if word is None:
-            word = self.quick_word()
+    def anagram(self, word: str) -> str:
+        """Возвращает анаграмму слова"""
+        if word == "":
+            return word
         shuffled = "".join(sample(word, len(word)))
         while shuffled == word:
             shuffled = "".join(sample(word, len(word)))
