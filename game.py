@@ -12,8 +12,9 @@ class Game(ctk.CTk):
         # Инициализация переменных игры
         self.w = Word()
         self.score = 0
-        self.hint_text = ""
+        self.text_hint = ""
         self.anagram = ""
+        self.original_word = ""
         self.word = ""
         self.complexity = None
         self.counter = None
@@ -27,7 +28,7 @@ class Game(ctk.CTk):
         self.entry = None
         self.check_button = None
         self.hint_button = None
-        self.text_variable = ctk.StringVar()
+        self.text_entry = ctk.StringVar()
 
         # Настройки звука и музыки
         self.music_value = ctk.BooleanVar(value=True)
@@ -113,8 +114,8 @@ class Game(ctk.CTk):
 
     def show_game(self):
         self.clear_screen()
-        self.hint_text = ""
-        self.text_variable = ctk.StringVar()
+        self.text_hint = ""
+        self.text_entry = ctk.StringVar()
 
         frame = ctk.CTkFrame(self)
         frame.pack(fill="both", expand=True, padx=20, pady=20)
@@ -122,12 +123,12 @@ class Game(ctk.CTk):
         self.score_label = ctk.CTkLabel(frame, text=f"Счёт: {self.score}", font=("Arial", 20))
         self.score_label.pack(pady=10)
 
-        ctk.CTkLabel(frame, text=f"Анаграмма {len(self.word)} букв", font=("Arial", 22)).pack(pady=10)
+        ctk.CTkLabel(frame, text=f"Анаграмма {len(self.original_word)} букв", font=("Arial", 22)).pack(pady=10)
 
         self.anagram_label = ctk.CTkLabel(frame, text=self.anagram, font=("Arial", 20))
         self.anagram_label.pack(pady=10)
 
-        self.entry = ctk.CTkEntry(frame, textvariable = self.text_variable,width=200)
+        self.entry = ctk.CTkEntry(frame, textvariable = self.text_entry,width=200)
         self.entry.pack(pady=10)
 
         self.check_button = ctk.CTkButton(frame, text="Проверить", width=200, command=lambda: [self.sound_button(), self.word_checker()])
@@ -144,47 +145,51 @@ class Game(ctk.CTk):
 
     def hint(self):
         if self.counter > 0:
-            self.score -= int(len(self.word) * 0.5)
+            part_word = self.word_array[self.total_hints - self.counter]
+            self.text_hint += part_word
 
-            self.score = max(0, self.score)
-            self.score_label.configure(text=f"Счёт: {self.score}")
+            if len(self.original_word) > 3:
+                self.word = self.word.replace(part_word, "",1)
+                text_anagram = self.text_hint + self.w.anagram(self.word)
+                self.anagram_label.configure(text = text_anagram)
 
-            self.hint_text += self.word_array[self.total_hints - self.counter]
             self.counter -= 1
+
             self.hint_button.configure(text=f"Подсказка {self.counter}/{self.total_hints}")
-            self.text_variable.set(self.hint_text)
+            self.text_entry.set(self.text_hint)
             self.entry.icursor('end')
 
         if self.counter == 0:
             self.hint_button.configure(state="disabled")
-            # self.check_button.configure(state="disabled")
             return
 
 
     def word_checker(self):
-        if self.text_variable.get().strip().lower() == self.word:
-            self.score+=len(self.word)
+        if self.text_entry.get().strip().lower() == self.original_word:
+            self.score+= len(self.original_word) - len(self.text_hint)
             self.score_label.configure(text=f"Счёт: {self.score}")
             self.start_game(self.complexity)
         else:
-            self.text_variable.set("")
+            self.text_entry.set(self.text_hint)
+            self.entry.icursor('end')
 
     def start_game(self, complexity,line_length=None):
         self.total_hints = 0
         self.counter=0
         self.complexity = complexity
-        self.word = self.w.quick_word(self.complexity)
-        self.anagram = self.w.anagram(self.word)
+        self.original_word = self.w.quick_word(self.complexity)
+        self.word = self.original_word
+        self.anagram = self.w.anagram(self.original_word)
         self.counter = 2
 
-        if len(self.word) % 2:
-            line_length=len(self.word)//self.counter+1
+        if len(self.original_word) % 2:
+            line_length= len(self.original_word) // self.counter + 1
         else:
-            line_length=(len(self.word)//self.counter)
+            line_length=(len(self.original_word) // self.counter)
 
         self.total_hints = self.counter
 
-        self.word_array = [self.word[i:i+line_length] for i in range(0,len(self.word),line_length)]
+        self.word_array = [self.original_word[i:i + line_length] for i in range(0,len(self.original_word),line_length)]
         self.show_game()
 
 
