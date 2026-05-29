@@ -55,7 +55,12 @@ class Game(ctk.CTk):
 
         ctk.CTkLabel(frame, text="Анаграммы", font=("Arial", 28, "bold")).pack(pady=30)
 
-        ctk.CTkButton(frame, text="Играть", width=200, command = lambda :[self.sound_button(), self.show_complexity()]).pack(pady=10)
+        ctk.CTkButton(
+            frame,
+            text="Играть",
+            width=200,
+            command=lambda: [self.sound_button(), self.show_complexity()],
+        ).pack(pady=10)
 
         ctk.CTkButton(frame, text="Настройки", width=200, command = lambda: [self.sound_button(), self.settings()]).pack(pady=10)
 
