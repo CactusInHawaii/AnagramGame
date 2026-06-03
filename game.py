@@ -2,21 +2,29 @@ import customtkinter as ctk
 from just_playback import Playback
 from words import Word
 from configparser import ConfigParser
-from pathlib import Path
 
 class Game(ctk.CTk):
     def __init__(self):
+        """
+        Инициализация главного окна игры, загрузка конфигурации, 
+        инициализация игровых переменных и запуск главного меню.
+        """
         super().__init__()
         self.title("Анаграммы")
         self.geometry("400x500")
         self.resizable(False, False)
 
-        #Инициализация
+        # Инициализация конфига
         self.config = ConfigParser()
         self.config.read("config.ini")
 
-        #Инициализация
+        # Инициализация логики слов
         self.w = Word()
+
+        # Инициализация плееров
+        self.sound_player = Playback()
+        self.music_player = Playback()
+        self._setting_up_player()
 
         # Инициализация переменных игры
         self.score = 0
@@ -28,7 +36,7 @@ class Game(ctk.CTk):
         self.counter = None
         self.total_hints = None
         self.word_array = None
-        self.best_score = int(self.config["Menu"]["best_score"]) #лучший счёт
+        self.best_score = int(self.config["Menu"]["best_score"])
         self.music_value = ctk.BooleanVar()
         self.sound_button_value = ctk.BooleanVar()
 
@@ -43,16 +51,14 @@ class Game(ctk.CTk):
         self.check_box_music = None
         self.check_box_sound = None
 
-        # Инициализация плееров
-        self.sound_player = Playback()
-        self.music_player = Playback()
-        self._setting_up_player()
-
         # Запуск главного меню
         self.show_menu()
 
     def _setting_up_player(self):
-        """Настройка плееров"""
+        """
+        Загрузка аудиофайлов и установка начальных настроек звука и музыки 
+        на основе данных из файла конфигурации.
+        """
         self.sound_player.load_file("click.mp3")
         sound_button_enabled = self.config["Settings"]["sound_button"]
         self.sound_button_value.set(bool(sound_button_enabled))
@@ -64,13 +70,19 @@ class Game(ctk.CTk):
         self.music()
 
     def sound_button(self):
-        """Воспроизведение звука кнопки"""
+        """
+        Воспроизведение короткого звука при нажатии на кнопку, 
+        если звук включен в настройках.
+        """
         if self.sound_button_value.get():
             self.sound_player.play()
             self.sound_player.set_volume(0.1)
 
     def music(self):
-        """Управление фоновой музыкой"""
+        """
+        Управление фоновой музыкой: запуск воспроизведения или постановка на паузу 
+        в зависимости от состояния переменной music_value.
+        """
         if self.music_value.get():
             if not self.music_player.playing:
                 self.music_player.play()
@@ -79,7 +91,10 @@ class Game(ctk.CTk):
             self.music_player.pause()
 
     def save_settings(self):
-        """Сохранение настроек в конфиг"""
+        """
+        Сохранение текущих настроек звука, музыки и лучшего счета 
+        в файл конфигурации config.ini.
+        """
         self.config["Settings"]["music"] = str(self.music_value.get())
         self.config["Settings"]["sound_button"] = str(self.sound_button_value.get())
         self.config["Menu"]["best_score"] = str(self.best_score)
@@ -87,31 +102,27 @@ class Game(ctk.CTk):
             self.config.write(configfile)
 
     def show_menu(self):
-        """Панель главного меню"""
+        """
+        Отображение экрана главного меню с кнопками запуска игры, 
+        перехода в настройки и выхода.
+        """
         self.clear_screen()
 
         frame = ctk.CTkFrame(self)
         frame.pack(fill="both", expand=True, padx=20, pady=20)
 
         ctk.CTkLabel(frame, text="Анаграммы", font=("Arial", 28, "bold")).pack(pady=10)
-
         ctk.CTkLabel(frame, text=f"Лучший счёт: {self.best_score}", font=("Arial", 24, "bold")).pack(pady=10)
 
-        ctk.CTkButton(
-            frame,
-            text="Играть",
-            width=200,
-            command=lambda: [self.sound_button(), self.show_complexity()],
-        ).pack(pady=10)
+        ctk.CTkButton(frame,text="Играть", width=200,command=lambda: [self.sound_button(), self.show_complexity()]).pack(pady=10)
 
         ctk.CTkButton(frame, text="Настройки", width=200, command = lambda: [self.sound_button(), self.settings()]).pack(pady=10)
-
         ctk.CTkButton(frame, text="Выход", width=200, command=lambda: [self.sound_button(), self.quit()]).pack(pady=10)
 
         self.current_frame = frame
 
     def settings(self):
-        """Панель настроек"""
+        """Отображение экрана настроек с чекбоксами для управления музыкой и звуком."""
         self.clear_screen()
 
         frame = ctk.CTkFrame(self)
@@ -119,30 +130,17 @@ class Game(ctk.CTk):
 
         ctk.CTkLabel(frame, text="Настройки",font=("Arial", 28, "bold"), width=200).pack(pady=10)
 
-        self.check_box_music = ctk.CTkCheckBox(
-            frame,
-            variable=self.music_value,
-            text="Музыка",
-            width=200,
-            command=lambda: [self.sound_button(), self.music(), self.save_settings()],
-        )
+        self.check_box_music = ctk.CTkCheckBox(frame, variable=self.music_value, text="Музыка", width=200, command=lambda: [self.sound_button(), self.music(), self.save_settings()])
         self.check_box_music.pack(pady=10)
 
-        self.check_box_sound = ctk.CTkCheckBox(
-            frame,
-            variable=self.sound_button_value,
-            text="Звук от кнопки",
-            width=200,
-            command=lambda: [self.sound_button(), self.save_settings()]
-        )
+        self.check_box_sound = ctk.CTkCheckBox(frame, variable=self.sound_button_value, text="Звук от кнопки", width=200, command=lambda: [self.sound_button(), self.save_settings()])
         self.check_box_sound.pack(pady=10)
 
         self.back_to_menu(frame)
-
         self.current_frame = frame
 
     def show_complexity(self):
-        """Панель выбора сложности"""
+        """Отображение экрана выбора уровня сложности (Легко, Средне, Сложно)."""
         self.clear_screen()
 
         frame = ctk.CTkFrame(self)
@@ -151,19 +149,20 @@ class Game(ctk.CTk):
         ctk.CTkLabel(frame, text="Выберете сложность", font=("Arial", 24)).pack(pady=10)
 
         ctk.CTkButton(frame, text="Легко", width=200, command=lambda: [self.sound_button(), self.start_game(1)]).pack(pady=10)
-
         ctk.CTkButton(frame, text="Средне", width=200, command=lambda: [self.sound_button(), self.start_game(2)]).pack(pady=10)
-
         ctk.CTkButton(frame,text="Сложно",width=200,command=lambda: [self.sound_button(), self.start_game(3)]).pack(pady=10)
 
         self.current_frame = frame
 
-    def back_to_menu(self,frame):
-        """Создание кнопки для возвращения в меню"""
+    def back_to_menu(self, frame):
+        """Создание и размещение кнопки возврата в главное меню на указанном фрейме."""
         return ctk.CTkButton(frame,text="Назад в меню",width=200,command = lambda: [self.sound_button(), self.show_menu()]).pack(pady=10)
 
     def show_game(self):
-        """Панель игрового поля"""
+        """
+        Отображение основного игрового интерфейса: анаграмма, поле ввода, 
+        кнопки проверки и подсказки.
+        """
         self.clear_screen()
         self.text_hint = ""
         self.text_entry = ctk.StringVar()
@@ -191,11 +190,13 @@ class Game(ctk.CTk):
         ctk.CTkButton(frame, text="Следующее слово", width=200, command=lambda:[self.sound_button(), self.start_game(self.complexity)]).pack(pady=10)
 
         self.back_to_menu(frame)
-
         self.current_frame = frame
 
     def hint(self):
-        """Логика подсказок"""
+        """
+        Логика выдачи подсказки: открывает часть слова, обновляет 
+        отображение анаграммы и вставляет буквы в поле ввода.
+        """
         if self.counter > 0:
             part_word = self.word_array[self.total_hints - self.counter]
             self.text_hint += part_word
@@ -206,7 +207,6 @@ class Game(ctk.CTk):
                 self.anagram_label.configure(text = text_anagram)
 
             self.counter -= 1
-
             self.hint_button.configure(text=f"Подсказка {self.counter}/{self.total_hints}")
             self.text_entry.set(self.text_hint)
             self.entry.icursor('end')
@@ -216,12 +216,17 @@ class Game(ctk.CTk):
             return
 
     def word_checker(self):
-        """Логика проверки слова"""
+        """
+        Сравнение введенного пользователем слова с оригиналом. 
+        Начисление очков при успехе или сброс ввода при ошибке.
+        """
         if self.text_entry.get().strip().lower() == self.original_word:
             self.score+= len(self.original_word) - len(self.text_hint)
             self.score_label.configure(text=f"Счёт: {self.score}")
+
             if self.score > self.best_score:
                 self.best_score = self.score
+
             self.save_settings()
             self.start_game(self.complexity)
         else:
@@ -229,7 +234,10 @@ class Game(ctk.CTk):
             self.entry.icursor('end')
 
     def start_game(self, complexity):
-        """Запуск игрового поля"""
+        """
+        Подготовка нового раунда: выбор случайного слова, генерация анаграммы
+        и разбиение слова на части для системы подсказок.
+        """
         self.total_hints = 0
         self.counter=0
         self.complexity = complexity
@@ -238,25 +246,17 @@ class Game(ctk.CTk):
         self.anagram = self.w.anagram(self.original_word)
         self.counter = 2
 
-
         if len(self.original_word) % 2:
             line_length= len(self.original_word) // self.counter + 1
         else:
             line_length=(len(self.original_word) // self.counter)
 
         self.total_hints = self.counter
-
         self.word_array = [self.original_word[i:i + line_length] for i in range(0,len(self.original_word),line_length)]
         self.show_game()
 
-
     def clear_screen(self):
-        """Удаляет прошлый фрейм"""
+        """Удаление текущего активного фрейма из окна для отрисовки нового экрана."""
         if self.current_frame:
             self.current_frame.destroy()
             self.current_frame = None
-
-
-if __name__ == "__main__":
-    app = Game()
-    app.mainloop()

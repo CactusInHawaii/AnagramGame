@@ -38,7 +38,8 @@ class Word:
         self.load_words()
         return choice(self.sorted_list) if self.sorted_list else ""
 
-    def anagram(self, word: str) -> str:
+    @staticmethod
+    def anagram(word: str) -> str:
         """Возвращает анаграмму слова"""
         if word == "":
             return word
