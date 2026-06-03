@@ -6,7 +6,7 @@ from configparser import ConfigParser
 class Game(ctk.CTk):
     def __init__(self):
         """
-        Инициализация главного окна игры, загрузка конфигурации, 
+        Инициализация главного окна игры, загрузка конфигурации,
         инициализация игровых переменных и запуск главного меню.
         """
         super().__init__()
@@ -24,7 +24,7 @@ class Game(ctk.CTk):
         # Инициализация плееров
         self.sound_player = Playback()
         self.music_player = Playback()
-        self._setting_up_player()
+
 
         # Инициализация переменных игры
         self.score = 0
@@ -51,6 +51,9 @@ class Game(ctk.CTk):
         self.check_box_music = None
         self.check_box_sound = None
 
+        # настройка плееров
+        self._setting_up_player()
+
         # Запуск главного меню
         self.show_menu()
 
@@ -60,12 +63,13 @@ class Game(ctk.CTk):
         на основе данных из файла конфигурации.
         """
         self.sound_player.load_file("click.mp3")
-        sound_button_enabled = self.config["Settings"]["sound_button"]
+        sound_button_enabled = self.config.getboolean("Settings", "sound_button")
         self.sound_button_value.set(bool(sound_button_enabled))
 
         self.music_player.load_file("music.mp3")
         self.music_player.loop_at_end(True)
-        music_enabled = self.config["Settings"]["music"]
+
+        music_enabled = self.config.getboolean("Settings", "music")
         self.music_value.set(bool(music_enabled))
         self.music()
 
@@ -260,3 +264,7 @@ class Game(ctk.CTk):
         if self.current_frame:
             self.current_frame.destroy()
             self.current_frame = None
+
+if __name__ == "__main__":
+    app = Game()
+    app.mainloop()
